@@ -1,0 +1,15 @@
+sudo: required
+
+language: generic
+
+services: docker
+
+before_install:
+  - echo "start Creating an image with dockerfile"
+  - docker build -t existmaster/restaurant-rest .
+
+script:
+  - echo "testing.."
+
+after_success:
+  - echo "Test Success"
