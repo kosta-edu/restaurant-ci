@@ -13,6 +13,7 @@ services:
 
 script:
   # BUILD
+  - chmod +x ./gradlew
   - ./gradlew build
 
   # GET NAME
