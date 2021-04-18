@@ -21,7 +21,7 @@ before_deploy:
 
 script:
 #  # BUILD
-  - ./gradlew clen build
+  - ./gradlew clean build
 #
 #  # GET NAME
 #  - PRJ_GROUP=$(./gradlew properties -q | grep "group:" | awk '{print $2}')
