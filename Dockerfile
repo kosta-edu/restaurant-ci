@@ -1,10 +1,6 @@
-FROM gradle:6.8-jdk8 as builder
-COPY --chown=gradle:gradle . /home/gradle/src
-WORKDIR /home/gradle/src
-ENV GRADLE_USER_HOME=~/.gradle
-RUN gradle build
-
-FROM openjdk:8-jre-alpine
-COPY --from=builder /home/gradle/src/build/libs/*.jar /app.jar
-ENV PORT 80
-CMD ["java","-Djava.security.egd=file:/dev/./urandom","-Dserver.port=${PORT}","-jar","/app.jar"]
+FROM openjdk:8-jdk-alpine
+VOLUME /tmp
+RUN echo ${JAR_FILE}
+ARG JAR_FILE
+ADD ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]

@@ -1,21 +1,33 @@
-sudo: required
 language: java
-install: true
+jdk: oraclejdk8
+
+sudo: required
+
+cache:
+  directories:
+    - .autoconf
+    - $HOME/.m2
 
 services:
   - docker
 
-before_install:
-  - echo "start Creating an image with dockerfile"
-  - docker build -t existmaser/restaurant-rest .
-
 script:
-  - echo "testing.."
-  - chmod +x ./gradlew
-  - ./gradlew test
+  # BUILD
+  - ./gradlew build
 
-after_success:
-  - echo "Test Success"
+  # GET NAME
+  - PRJ_GROUP=$(gradle properties -q | grep "group:" | awk '{print $2}')
+  - PRJ_NAME=$(gradle properties -q | grep "name:" | awk '{print $2}')
+  - PRJ_VERSION=$(gradle properties -q | grep "version:" | awk '{print $2}')
+
+  - echo "## PROJECT_GROUP - ${PRJ_GROUP}"
+  - echo "## PROJECT_NAME - ${PRJ_NAME}"
+  - echo "## PROJECT_VERSION - ${PRJ_VERSION}"
+
+  - PRJ_JAR=${PRJ_NAME}-${PRJ_VERSION}.jar
+
+  # DOCKER BUILD
+  - docker build -t ${PRJ_GROUP}.${PRJ_NAME}:latest --build-arg JAR_FILE=build/libs/${PRJ_JAR} ./
 
 deploy:
   provider: elasticbenastalk
