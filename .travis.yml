@@ -14,15 +14,15 @@ cache:
     - '$HOME/.m2/repository'
     - '$HOME/.gradle'
 
+script:
+  #  # BUILD
+  - ./gradlew clean build
+  -
 before_deploy:
   - zip -r restaurant-ci *
   - mkdir -p deploy
   - mv restaurant-ci.zip deploy/restaurant-ci.zip
 
-
-script:
-#  # BUILD
-  - ./gradlew clean build
 #
 #  # GET NAME
 #  - PRJ_GROUP=$(./gradlew properties -q | grep "group:" | awk '{print $2}')
@@ -46,6 +46,7 @@ deploy:
     region: ap-northeast-2
     skip_cleanup: true
     acl: public_read
+    local_dir: deploy # before_deploy에서 생성한 디렉토리
     wait-until-deployed: true
     on:
       repo: kosta-edu/restaurant-ci #Github 주소
