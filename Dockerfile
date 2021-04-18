@@ -6,5 +6,5 @@ RUN gradle build
 
 FROM openjdk:8-jre-alpine
 COPY --from=builder /home/gradle/src/build/libs/*.jar /app.jar
-ENV PORT 8080
+ENV PORT 80
 CMD ["java","-Djava.security.egd=file:/dev/./urandom","-Dserver.port=${PORT}","-jar","/app.jar"]
