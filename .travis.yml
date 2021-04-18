@@ -2,44 +2,76 @@ language: java
 jdk: openjdk8
 
 sudo: required
-
-cache:
-  directories:
-    - .autoconf
-    - $HOME/.m2
-
-services:
-  - docker
+#
+#services:
+#  - docker
 
 before_install:
   - chmod +x ./gradlew
 
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.gradle'
+
+before_deploy:
+  - zip -r restaurant-ci *
+  - mkdir -p deploy
+  - mv restaurant-ci.zip deploy/restaurant-ci.zip
+
 script:
-  # BUILD
-  - ./gradlew build
-
-  # GET NAME
-  - PRJ_GROUP=$(./gradlew properties -q | grep "group:" | awk '{print $2}')
-  - PRJ_NAME=$(./gradlew properties -q | grep "name:" | awk '{print $2}')
-  - PRJ_VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
-
-  - echo "## PROJECT_GROUP - ${PRJ_GROUP}"
-  - echo "## PROJECT_NAME - ${PRJ_NAME}"
-  - echo "## PROJECT_VERSION - ${PRJ_VERSION}"
-
-  - PRJ_JAR=${PRJ_NAME}-${PRJ_VERSION}.jar
-
-  # DOCKER BUILD
-  - docker build -t ${PRJ_GROUP}.${PRJ_NAME}:latest --build-arg JAR_FILE=build/libs/${PRJ_JAR} ./
+#  # BUILD
+  - ./gradlew clen build
+#
+#  # GET NAME
+#  - PRJ_GROUP=$(./gradlew properties -q | grep "group:" | awk '{print $2}')
+#  - PRJ_NAME=$(./gradlew properties -q | grep "name:" | awk '{print $2}')
+#  - PRJ_VERSION=$(./gradlew properties -q | grep "version:" | awk '{print $2}')
+#
+#  - echo "## PROJECT_GROUP - ${PRJ_GROUP}"
+#  - echo "## PROJECT_NAME - ${PRJ_NAME}"
+#  - echo "## PROJECT_VERSION - ${PRJ_VERSION}"
+#
+#  - PRJ_JAR=${PRJ_NAME}-${PRJ_VERSION}.jar
+#
+#  # DOCKER BUILD
+#  - docker build -t ${PRJ_GROUP}.${PRJ_NAME}:latest --build-arg JAR_FILE=build/libs/${PRJ_JAR} ./
 
 deploy:
-  provider: elasticbenastalk
-  region: "us-east-1"
-  app: "docker-java-app"
-  env: "Dockerjavaapp-env"
-  bucket_name: "elasticbeanstalk-us-east-1-893382876075"
-  bucket_path: "docker-java-app"
-  on:
-    branch: master
-  access_key_id: $AWS_ACCESS_KEY
-  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY # Travis repo settings에 설정된 값
+    secret_access_key: $AWS_SECRET_KEY # Travis repo settings에 설정된 값
+    bucket: aws-springboot-webservice-deploy # 6-3-3에서 생성한 S3 버킷
+    region: ap-northeast-2
+    skip_cleanup: true
+    acl: public_read
+    wait-until-deployed: true
+    on:
+      repo: kosta-edu/restaurant-ci #Github 주소
+      branch: master
+
+#  - provider: codedeploy
+#    access_key_id: $AWS_ACCESS_KEY # Travis repo settings에 설정된 값
+#    secret_access_key: $AWS_SECRET_KEY # Travis repo settings에 설정된 값
+#    bucket: springboot-webservice-deploy # S3 버킷
+#    key: restaurant-ci.zip # S3 버킷에 저장된 springboot-webservice.zip 파일을 EC2로 배포
+#    bundle_type: zip
+#    application: springboot-webservice # 웹 콘솔에서 등록한 CodeDeploy 어플리케이션
+#    deployment_group: springboot-webservice-group # 웹 콘솔에서 등록한 CodeDeploy 배포 그룹
+#    region: ap-northeast-2
+#    wait-until-deployed: true
+#    on:
+#      repo: jojoldu/springboot-webservice
+#      branch: master
+#
+#deploy:
+#  provider: elasticbenastalk
+#  region: "us-east-1"
+#  app: "docker-java-app"
+#  env: "Dockerjavaapp-env"
+#  bucket_name: "elasticbeanstalk-us-east-1-893382876075"
+#  bucket_path: "docker-java-app"
+#  on:
+#    branch: master
+#  access_key_id: $AWS_ACCESS_KEY
+#  secret_access_key: $AWS_SECRET_ACCESS_KEY
