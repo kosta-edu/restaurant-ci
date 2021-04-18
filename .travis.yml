@@ -11,9 +11,11 @@ cache:
 services:
   - docker
 
+before_install:
+  - chmod +x ./gradlew
+
 script:
   # BUILD
-  - chmod +x ./gradlew
   - ./gradlew build
 
   # GET NAME
