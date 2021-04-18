@@ -19,6 +19,7 @@ before_deploy:
   - mkdir -p deploy
   - mv restaurant-ci.zip deploy/restaurant-ci.zip
 
+
 script:
 #  # BUILD
   - ./gradlew clean build
